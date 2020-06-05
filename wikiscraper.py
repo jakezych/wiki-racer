@@ -2,25 +2,25 @@ import requests
 from bs4 import BeautifulSoup 
 
 class Wikiscraper:
-  def __init__(self):
-    self.page = None
-    self.pageLinks = set()
-    self.setRandomPage()
-    self.getPageLinks()
-    
-  def setRandomPage(self):
-    self.page = requests.get('https://en.wikipedia.org/wiki/Special:Random')
-  
-  def getPageLinks(self):
-    soup = BeautifulSoup(self.page.content, 'html.parser');
+  #returns the json object of a wiki page given a path
+  def getPage(self, path):
+    return requests.get('https://en.wikipedia.org' + path)
+
+  #returns a set of all the possible links given a wiki page
+  def getPageLinks(self, page):
+    soup = BeautifulSoup(page.content, 'html.parser');
     possibleLinks = soup.find_all('a', href=True)
 
+    pageLinks = set()
     for elem in possibleLinks:
       link = elem.get('href')
       
       if(self.isValid(link)):
-        self.pageLinks.add(link)
+        pageLinks.add(link)
 
+    return pageLinks
+
+  #checks if a link is a valid link to another wiki page
   def isValid(self, link):
     if(link == '/wiki/Main_Page'):
       return False
@@ -32,3 +32,5 @@ class Wikiscraper:
       return False
 
     return True
+
+#/wiki/Special:Random = random wiki article
