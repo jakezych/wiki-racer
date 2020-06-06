@@ -1,55 +1,22 @@
-from wikiscraper import *
-import heapq
-import copy
+from wikiracer import *
+import time
+#TO-DO: make api calls asynchronous, use asynchio library
+#       when inputting Special:Random, ladder doesn't actually contains name of page
+def main():
+  wikiRacer = Wikiracer()
+  
+  print('Starting search')
 
-class Controller:
-  def __init__(self):
-    self.scraper = Wikiscraper() 
+  startTime = time.perf_counter()
+  solution = wikiRacer.findSolution('/wiki/Milkshake', '/wiki/Gene')
+  endTime = time.perf_counter()
 
-  #return a set of the links of the next page of a ladder
-  def getNextPageLinks(self, ladder):
-    nextPage = self.scraper.getPage(ladder[len(ladder) - 1])
-    return self.scraper.getPageLinks(nextPage)
+  formatted = [page[6:] for page in solution]
 
-  #returns the priority of a ladder by looking at how many links the next page 
-  #in the ladder shares with the target page. 
-  def calculatePriority(self, ladder, targetLinks):
-    pageLinks = self.getNextPageLinks(ladder)
-    inCommon = len(set.intersection(pageLinks, targetLinks))
-    #negate the result because heapq is a min-heap but max-heap required
-    return -inCommon 
+  print(formatted)
+  print(f'Time Elapsed: {endTime - startTime:0.3f} seconds')
 
-  #takes in 2 wiki pages and finds a path of wiki pages between them
-  def findSolution(self, start, target):
-    pQueue = [] 
-    targetPage = self.scraper.getPage(target)
-    targetLinks = self.scraper.getPageLinks(targetPage)
-    startLadder = [start]
-    startPriority = self.calculatePriority(startLadder, targetLinks)
-    heapq.heappush(pQueue, (startPriority, startLadder))
+if __name__ == '__main__':
+  main()
 
-    while(len(pQueue) != 0):
-      (priority, curLadder) = heapq.heappop(pQueue)
-      pageLinks = self.getNextPageLinks(curLadder)
-
-      if(target in pageLinks):
-        curLadder.append(target)
-        return curLadder
-
-      #this loops takes a really long time -> beautiful soup??
-      for page in pageLinks:
-        ladderCopy = [] + curLadder
-        ladderCopy.append(page)
-        ladderPriority = self.calculatePriority(ladderCopy, targetLinks)
-        print("new priority" + str(ladderPriority))
-        print('new ladder:')
-        print(ladderCopy)
-        heapq.heappush(pQueue, (ladderPriority, ladderCopy))
-      
-    #no ladder found
-    return []
-
-test = Controller()
-
-#look into using pywikibot
-print(test.findSolution('/wiki/Emu', '/wiki/Stanford_University'))
+#Milkshake -> Gene = ~76s
