@@ -7,3 +7,6 @@ Python 3.6+, requests, bs4, heapq, asyncio
 # To-Do: 
 * Use asyncio to make api requests asynchronously to cut down on the time it takes for the algorithm to run. 
 * Create a GUI and make this project into a game or use Discord api to make this project into a discord bot.
+
+
+change
